@@ -17,6 +17,16 @@ from .version import __version__
 from .helper import get_file_hash, print_download_bar, check_date, parse_url, compile_post_path, compile_file_path, RefererSession
 from .my_yt_dlp import my_yt_dlp
 
+custom_postlinks = []
+custom_postpath = None
+def custom_script():
+    if not custom_postlinks or not custom_postpath:
+        return 
+    
+    with open(custom_postpath,"w",encoding="utf8") as f:
+        for link in custom_postlinks:
+            f.write(f"{link}\n")
+
 class downloader:
 
     def __init__(self, args):
@@ -275,6 +285,16 @@ class downloader:
 
     def compile_content_links(self, post, content_soup, embed_links):
         href_links = content_soup.find_all(href=True)
+        # custom
+        global custom_postlinks,custom_postpath
+        custom_postpath = f"{post['post_path']}.txt"
+
+        _href_links = re.findall(r"""(http[s]?://(?:drive\.google|mega\.nz)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|])""",content_soup.text)
+        if _href_links:
+            for k,v in enumerate(_href_links):
+                _href_links[k] = f"{post['post_variables']['published']}] [{post['post_variables']['id']}] {v}"
+            custom_postlinks.extend(_href_links)
+        # custom
         post['links']['text'] = embed_links
         for href_link in href_links:
             post['links']['text'] += f"{href_link['href']}\n"
@@ -777,6 +797,8 @@ class downloader:
         for url in urls:
             try:
                 self.get_post(url)
+                # test
+                custom_script()
             except:
                 logger.exception(f"Unable to get posts for {url}")
 

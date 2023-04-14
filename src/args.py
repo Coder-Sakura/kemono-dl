@@ -262,7 +262,7 @@ def get_args():
     if args['from_file']:
         if not os.path.exists(args['from_file']):
             print(f"--from-file {args['from_file']} does not exist")
-        with open(args['from_file'],'r') as f:
+        with open(args['from_file'],'r',encoding="utf8") as f:
             # lines starting with '#' are ignored
             args['from_file'] = [line.rstrip().split('?')[0] for line in f if line[0] != '#' and line.strip() != '']
     else:
